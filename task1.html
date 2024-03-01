@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+</head>
+
+<body>
+    <form>
+        <label for="email">Your e-mail:</label><br>
+        <input type="email" id="email" required><br>
+
+        <label for="password1">Your password:</label><br>
+        <input type="password" id="password1" required><br>
+
+        <label for="password2">Repeat password:</label><br>
+        <input type="password" id="password2" required><br>
+
+        <button type="button" class="button" id="Sign" onclick="validateAndRedirect()">Sign in</button>
+    </form>
+
+    <script>
+        function IsValidEmail(email) {
+            const re = /^[\w-\.]+@([\w-]+\.)+[\w-]{3,16}$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        function IsValidPassword(password) {
+            const re = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[A-Z])(?=.*[a-z])\w{6,16}$/;
+            return re.test(String(password));
+        }
+
+        function generateUserId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function addcc() {
+            const emailInput = document.getElementById('email').value;
+            const passwordInput = document.getElementById('password1').value;
+            const userId = generateUserId();
+
+            setCookie('userId', userId);
+            setCookie(`email_${userId}`, emailInput);
+            setCookie(`password_${userId}`, passwordInput);
+        }
+
+        function setCookie(name, value) {
+            let expires = '';
+            if (value.length > 0) {
+                const date = new Date();
+                date.setTime(date.getTime() + (1 * 24 * 60 * 60 * 1000));
+                expires = '; expires=' + date.toUTCString();
+                document.cookie = name + '=' + value + '; path=/' + expires;
+            }
+        }
+
+        function validateAndRedirect() {
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password1');
+            const confirmPasswordInput = document.getElementById('password2');
+
+            addcc()
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            const confirmPassword = confirmPasswordInput.value.trim();
+
+            setCookie(email, password);
+
+            if (!IsValidEmail(email)) {
+                alert('Invalid email format');
+            } else if (!IsValidPassword(password)) {
+                alert('Invalid password format');
+            } else if (password !== confirmPassword) {
+                alert('Passwords do not match');
+            } else {
+                const storedPassword = getCookie(email);
+                if (storedPassword === password) {
+                    window.location.href = `/task2.html?email=${encodeURIComponent(email)}`;
+                } else {
+                    alert('Incorrect email or password');
+                }
+            }
+        }
+
+
+        function getCookie(name) {
+            const NameC = name + '=';
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cook = cookies[i].trim();
+                if (cook.indexOf(NameC) === 0) {
+                    return decodeURIComponent(cook.substring(NameC.length));
+                }
+            }
+            return null;
+        }
+    </script>
+</body>
+
+</html>

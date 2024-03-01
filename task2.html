@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details</title>
+</head>
+
+<body>
+    <h2>User Details</h2>
+
+    <form id="userDetailsForm" onsubmit="return saveUserData()">
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" maxlength="20" required pattern="[A-Za-z]+"><br>
+
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" maxlength="20" required pattern="[A-Za-z]+"><br>
+
+        <label for="birthYear">Birth Year:</label>
+        <input type="number" id="birthYear" name="birthYear" min="1900" max="2024" required><br>
+
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender" required>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select><br>
+
+        <label for="phoneNumber">Phone Number:</label>
+        <input type="tel" id="phoneNumber" name="phoneNumber"><br>
+
+        <label for="skype">Skype (Not required):</label>
+        <input type="text" id="skype" name="skype"><br>
+
+        <button type="submit">Save</button>
+        <button type="button" onclick="exitAndRedirect()">Exit</button>
+    </form>
+
+    <script>
+        const firstName = document.getElementById('firstName');
+        const lastName = document.getElementById('lastName');
+        const birthYear = document.getElementById('birthYear');
+        const gender = document.getElementById('gender');
+        const phoneNumber = document.getElementById('phoneNumber');
+        const skype = document.getElementById('skype');
+
+        function saveUserData() {
+            const userId = getCookie('userId');
+            const email = getCookie(`email_${userId}`);
+            const password = getCookie(`password_${userId}`);
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const birthYear = document.getElementById('birthYear').value;
+            const gender = document.getElementById('gender').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const skype = document.getElementById('skype').value;
+
+            if (!/^[A-Za-z]+$/.test(firstName) || !/^[A-Za-z]+$/.test(lastName)) {
+                alert('Invalid name. Only letters are allowed.');
+                return false;
+            }
+
+            if (!isValidPhoneNumber(phoneNumber)) {
+                alert('Invalid phone number. Please enter a valid phone number.');
+                return false;
+            }
+
+            document.cookie = `userId=${userId}; max-age=3600`;
+            document.cookie = `email=${email}; max-age=3600`;
+            document.cookie = `firstName_${userId}=${firstName}; max-age=3600`;
+            document.cookie = `lastName_${userId}=${lastName}; max-age=3600`;
+            document.cookie = `birthYear_${userId}=${birthYear}; max-age=3600`;
+            document.cookie = `gender_${userId}=${gender}; max-age=3600`;
+            document.cookie = `phoneNumber_${userId}=${phoneNumber || ''}; max-age=3600`;
+            document.cookie = `skype_${userId}=${skype || ''}; max-age=3600`;
+
+            alert('User data saved successfully!');
+            return true;
+        }
+
+        function isValidPhoneNumber(phoneNumber) {
+            const phoneRegex = /^[\d ()-]{10,12}$/;
+            return phoneRegex.test(phoneNumber);
+        }
+
+
+        function exitAndRedirect() {
+            document.cookie = 'userId=; max-age=0';
+            window.location.href = '/task1.html';
+        }
+
+        function getCookie(name) {
+            const NameC = name + '=';
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cook = cookies[i].trim();
+                if (cook.indexOf(NameC) === 0) {
+                    return decodeURIComponent(cook.substring(NameC.length));
+                }
+            }
+            return null;
+        }
+
+        function displayUserData() {
+            const queryParams = new URLSearchParams(window.location.search);
+            const emailFromQuery = queryParams.get('email');
+
+            if (!emailFromQuery) {
+                console.log('No email found in the query parameters.');
+                return window.location.href = `/task1.html`;
+            }
+
+            const userIdRegex = /^email_(.*)$/;
+            const cookies = document.cookie.split(';');
+            let userId = null;
+
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim().split('=');
+                const cookieName = cookie[0];
+                const cookieValue = cookie[1];
+
+                const match = cookieName.match(userIdRegex);
+                if (match && cookieValue === emailFromQuery) {
+                    userId = match[1];
+                    break;
+                }
+            }
+
+            if (!userId) {
+                console.log('No matching user found in the cookies.');
+                return window.location.href = `/task1.html`;
+            }
+
+            console.log(`User ID: ${userId}`);
+            console.log(`Email: ${emailFromQuery}`);
+
+
+            const FirstName = getCookie(`firstName_${userId}`);
+            const LastName = getCookie(`lastName_${userId}`);
+            const BirthDate = getCookie(`birthYear_${userId}`);
+            const Gender = getCookie(`gender_${userId}`);
+            const number = getCookie(`phoneNumber_${userId}`);
+            const Skype = getCookie(`skype_${userId}`);
+
+            firstName.value = FirstName;
+            lastName.value = LastName;
+            birthYear.value = BirthDate;
+            gender.value = Gender;
+            phoneNumber.value = number;
+            skype.value = Skype;
+
+
+        }
+
+        window.onload = function () {
+            displayUserData();
+        };
+
+
+    </script>
+</body>
+
+</html>
